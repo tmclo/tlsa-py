@@ -57,7 +57,7 @@ def update_records(cf, zone_name, zone_id, usage_id, record_id, certificate):
     try:
         dns_record = cf.zones.dns_records.put(zone_id, record_id, data=dns_record)
     except CloudFlare.exceptions.CloudFlareAPIError as e:
-        exit('/zones.dns_records.put %s - %d %s - api call faile' % (zone_name, e, e))
+        exit('/zones.dns_records.put %s - %d %s - api call failed' % (zone_name, e, e))
 
 if __name__ == '__main__':
     main()
