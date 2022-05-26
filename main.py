@@ -1,18 +1,20 @@
 import os
 import sys
+import hashlib
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 import CloudFlare
 from dotenv import load_dotenv
 from pathlib import Path
 
 dotenv_path = Path('./.env')
 load_dotenv(dotenv_path=dotenv_path)
-if len(sys.argv) < 3:
-    exit('Usage: python3 ' + sys.argv[0] + ' usage_id record_id certificate')
+if len(sys.argv) < 2:
+    exit('Usage: python3 ' + sys.argv[0] + ' /etc/ssl/certs (no trailing slash)')
 
 def main():
-    usage_id = sys.argv[1]
-    record_id = sys.argv[2]
-    certificate = sys.argv[3]
+    certificate_dir = sys.argv[1]
     zone_name = os.getenv('ZONE_NAME')
     
     cf = CloudFlare.CloudFlare(token=os.getenv('CF_API_KEY'))
@@ -29,27 +31,39 @@ def main():
         
     zone = zones[0]
     zone_id = zone['id']
-
         
-    try:
-        dns_records = cf.zones.dns_records.get(zone_id)
-    except CloudFlare.exceptions.CloudFlareAPIError as e:
-        exit('/zones/dns_records.get %d %s - api call failed' % (e, e))
+    with open(certificate_dir + '/cert.pem', 'rb') as f:
+        dane_ee = x509.load_pem_x509_certificate(f.read(), default_backend())
+    
+    dane_ee_pubkey = dane_ee.public_key()
+    dane_ee_pubkey_bytes = dane_ee_pubkey.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
+    digest_ee = hashlib.sha256(dane_ee_pubkey_bytes).hexdigest()
+    print(f'_25._tcp.mail.example.com TLSA 3 1 1 {digest_ee}')
+    
+    with open(certificate_dir + '/chain.pem', 'rb') as t:
+        dane_ta = x509.load_pem_x509_certificate(t.read(), default_backend())
         
-    update_records(cf, zone_name, zone_id, usage_id, record_id, certificate)
+    dane_ta_pubkey = dane_ta.public_key()
+    dane_ta_pubkey_bytes = dane_ta_pubkey.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
+    digest_ta = hashlib.sha256(dane_ta_pubkey_bytes).hexdigest()
+    print(f'_25._tcp.mail.example.com TLSA 2 1 1 {digest_ta}')
+        
+        
+    update_records(cf, zone_name, zone_id, 3, 1, 1, digest_ee, os.getenv('EE_RECORD_ID'))
+    update_records(cf, zone_name, zone_id, 2, 1, 1, digest_ta, os.getenv('TA_RECORD_ID'))
         
 
     exit(0)
     
-def update_records(cf, zone_name, zone_id, usage_id, record_id, certificate):
+def update_records(cf, zone_name, zone_id, usage, selector, matching_type, certificate, record_id):
     dns_record = {
         'type':'TLSA',
         'name':'_25._tcp.mail.' + zone_name,
         'ttl':60,
         'data':{
-            'usage':usage_id,
-            'selector':1,
-            'matching_type':1,
+            'usage':usage,
+            'selector':selector,
+            'matching_type':matching_type,
             'certificate':certificate,
         },
     }
