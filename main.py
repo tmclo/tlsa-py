@@ -22,8 +22,10 @@ if len(sys.argv) < 2:
 def main():
     certificate_dir = sys.argv[1]
 
+    # initialize connection to CF API
     cf = CloudFlare.CloudFlare(token=cf_api_key)
 
+    # try to get the zone id for use in further functions
     try:
         zones = cf.zones.get(params = {'name':zone_name,'per_page':1})
     except CloudFlare.exceptions.CloudFlareAPIError as e:
@@ -37,6 +39,7 @@ def main():
     zone = zones[0]
     zone_id = zone['id']
 
+    # open certificates and convert them to the hexidecimal format for our TLSA records
     with open(certificate_dir + '/cert.pem', 'rb') as f:
         dane_ee = x509.load_pem_x509_certificate(f.read(), default_backend())
 
@@ -63,6 +66,7 @@ def main():
     except Exception as e:
         exit('/zones.get - %s - api call failed' % (e))
 
+    # check if our records already exist otherwise create them
     for i in records:
         if "2 1 1" in i['content']:
             # update DANE_TA record
@@ -83,6 +87,8 @@ def main():
 
     exit(0)
 
+# update records which already exist; you may edit the record "name" in order to change the port, etc.
+# however if you do this also update it in the create_record() function as well.
 def update_records(cf, zone_name, zone_id, usage, selector, matching_type, certificate, record_id):
     dns_record = {
         'type':'TLSA',
@@ -101,6 +107,7 @@ def update_records(cf, zone_name, zone_id, usage, selector, matching_type, certi
     except CloudFlare.exceptions.CloudFlareAPIError as e:
         exit('/zones.dns_records.put %s - %d %s - api call failed' % (zone_name, e, e))
 
+# when records don't already exist; this function creates them.
 def create_record(cf, zone_name, zone_id, usage, selector, matching_type, certificate):
     dns_record = {
         'type':'TLSA',
