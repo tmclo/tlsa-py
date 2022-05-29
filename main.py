@@ -8,6 +8,11 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 import CloudFlare
 
 # Using static variables instead of .env file for portability
+# You could look into using something like HashiCorp Vault or environment variables
+# an example of using environment variables would be to add/modify the following lines
+# import os (<- add this to the top of the file)
+# zone_name = os.environ.get("ZONE_NAME")
+# cf_api_key = os.environ.get("CF_API_KEY")
 zone_name = "example.com"
 cf_api_key = "-aPikEyeXamplE"
 
