@@ -12,6 +12,8 @@ import CloudFlare
 # import os (<- add this to the top of the file)
 # zone_name = os.environ.get("ZONE_NAME")
 # cf_api_key = os.environ.get("CF_API_KEY")
+#
+# Then run this program as such: ZONE_NAME=example.com CF_API_KEY="-example" python3 main.py /etc/letsencrypt/live/example.com
 zone_name = "example.com"
 cf_api_key = "-aPikEyeXamplE"
 
