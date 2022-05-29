@@ -20,6 +20,10 @@ if len(sys.argv) < 2:
 
 def main():
     certificate_dir = sys.argv[1]
+    if certificate_dir[-1] == '/':
+        certificateDir = certificate_dir[:-1]
+    else:
+        certificateDir = certificate_dir
 
     # initialize connection to CF API
     cf = CloudFlare.CloudFlare(token=cf_api_key)
@@ -39,14 +43,14 @@ def main():
     zone_id = zone['id']
 
     # open certificates and convert them to the hexidecimal format for our TLSA records
-    with open(certificate_dir + '/cert.pem', 'rb') as f:
+    with open(certificateDir + '/cert.pem', 'rb') as f:
         dane_ee = x509.load_pem_x509_certificate(f.read(), default_backend())
 
     dane_ee_pubkey = dane_ee.public_key()
     dane_ee_pubkey_bytes = dane_ee_pubkey.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
     digest_ee = hashlib.sha256(dane_ee_pubkey_bytes).hexdigest()
 
-    with open(certificate_dir + '/chain.pem', 'rb') as t:
+    with open(certificateDir + '/chain.pem', 'rb') as t:
         dane_ta = x509.load_pem_x509_certificate(t.read(), default_backend())
 
     dane_ta_pubkey = dane_ta.public_key()
