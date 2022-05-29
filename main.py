@@ -8,16 +8,17 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 import CloudFlare
 
-dotenv_path = Path('./.env')
-load_dotenv(dotenv_path=dotenv_path)
+# Using static variables instead of .env file for portability
+zone_name = "example.com"
+cf_api_key = "-aPikEyeXamplE"
+
 if len(sys.argv) < 2:
     exit('Usage: python3 ' + sys.argv[0] + ' /etc/ssl/certs (no trailing slash)')
 
 def main():
     certificate_dir = sys.argv[1]
-    zone_name = os.getenv('ZONE_NAME')
    
-    cf = CloudFlare.CloudFlare(token=os.getenv('CF_API_KEY'))
+    cf = CloudFlare.CloudFlare(token=cf_api_key)
     
     try:
         zones = cf.zones.get(params = {'name':zone_name,'per_page':1})
