@@ -1,7 +1,6 @@
 import sys
 import hashlib
 from pathlib import Path
-from dotenv import load_dotenv
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
