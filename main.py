@@ -1,12 +1,12 @@
 import os
 import sys
 import hashlib
+from pathlib import Path
+from dotenv import load_dotenv
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 import CloudFlare
-from dotenv import load_dotenv
-from pathlib import Path
 
 dotenv_path = Path('./.env')
 load_dotenv(dotenv_path=dotenv_path)
