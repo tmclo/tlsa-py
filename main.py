@@ -47,10 +47,29 @@ def main():
     dane_ta_pubkey_bytes = dane_ta_pubkey.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
     digest_ta = hashlib.sha256(dane_ta_pubkey_bytes).hexdigest()
     print(f'_25._tcp.mail.example.com TLSA 2 1 1 {digest_ta}')
+    
+    # check/create TLSA records & update accordingly if exist
+    params = {
+        "type": "TLSA",
+    }
+    
+    try:
+        records = cf.zones.dns_records.get(zone_id, params=params)
+    except CloudFlare.exceptions.CloudFlareAPIError as e:
+        exit('/zones.get - %s - api call failed' % (e))
+    except Exception as e:
+        exit('/zones.get - %s - api call failed' % (e))
         
-        
-    update_records(cf, zone_name, zone_id, 3, 1, 1, digest_ee, os.getenv('EE_RECORD_ID'))
-    update_records(cf, zone_name, zone_id, 2, 1, 1, digest_ta, os.getenv('TA_RECORD_ID'))
+    for i in records:
+        if "2 1 1" in i['content']:
+            # update DANE_TA record
+            update_records(cf, zone_name, zone_id, 2, 1, 1, digest_ta, i['id'])
+        elif "3 1 1" in i['content']:
+            # update DANE_EE Record
+            update_records(cf, zone_name, zone_id, 3, 1, 1, digest_ee, i['id'])
+        else:
+            # Create DANE records if not found
+            print("No DANE records found")
         
 
     exit(0)
