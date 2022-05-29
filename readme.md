@@ -1,4 +1,12 @@
-# tlsa record auto updater for cloudflare
+# TLSA Record Automation in Python
+
+### What does this project achieve?
+
+I wrote this project after setting up TLSA keys for my mail server and realising that due to using LetsEncrypt I would have to manually regenerate and update the TLSA keys in my cloudflare account each time I renew my certificates (monthly).
+
+There's two solutions I came across to this problem, the first was to run `certbot renew` with the `--reuse-keys` option, however reusing the same certificates each renewal is not recommended and is far from the best solution to this problem, the second solution was to automate the process of generating new TLSA records along with the renewal of the certificates every month, this project achieves this by using the x509 library in python along with the CloudFlare API library to automatically republish the TLSA certificates directly from my mail server after new certificates have been issues from LE; a far more optimal solution to the original problem.
+
+# How to use
 
 To use this project first clone it and then install the requirements as such:
 ```bash
