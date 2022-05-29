@@ -16,7 +16,7 @@ if len(sys.argv) < 2:
 def main():
     certificate_dir = sys.argv[1]
     zone_name = os.getenv('ZONE_NAME')
-    
+   
     cf = CloudFlare.CloudFlare(token=os.getenv('CF_API_KEY'))
     
     try:
