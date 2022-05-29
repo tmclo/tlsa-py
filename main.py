@@ -19,7 +19,9 @@ if len(sys.argv) < 2:
     exit('Usage: python3 ' + sys.argv[0] + ' /etc/ssl/certs (no trailing slash)')
 
 def main():
+    # initialize certificates_dir variable from argument
     certificate_dir = sys.argv[1]
+    # check for trailing slash and remove if exists
     if certificate_dir[-1] == '/':
         certificateDir = certificate_dir[:-1]
     else:
