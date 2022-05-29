@@ -38,7 +38,6 @@ def main():
     dane_ee_pubkey = dane_ee.public_key()
     dane_ee_pubkey_bytes = dane_ee_pubkey.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
     digest_ee = hashlib.sha256(dane_ee_pubkey_bytes).hexdigest()
-    print(f'_25._tcp.mail.example.com TLSA 3 1 1 {digest_ee}')
     
     with open(certificate_dir + '/chain.pem', 'rb') as t:
         dane_ta = x509.load_pem_x509_certificate(t.read(), default_backend())
@@ -46,7 +45,6 @@ def main():
     dane_ta_pubkey = dane_ta.public_key()
     dane_ta_pubkey_bytes = dane_ta_pubkey.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
     digest_ta = hashlib.sha256(dane_ta_pubkey_bytes).hexdigest()
-    print(f'_25._tcp.mail.example.com TLSA 2 1 1 {digest_ta}')
     
     # check/create TLSA records & update accordingly if exist
     params = {
@@ -64,13 +62,19 @@ def main():
         if "2 1 1" in i['content']:
             # update DANE_TA record
             update_records(cf, zone_name, zone_id, 2, 1, 1, digest_ta, i['id'])
+            print("DANE_TA record updated successfully: " + digest_ta)
         elif "3 1 1" in i['content']:
             # update DANE_EE Record
             update_records(cf, zone_name, zone_id, 3, 1, 1, digest_ee, i['id'])
+            print("DANE_EE record updated successfully: " + digest_ee)
         else:
-            # Create DANE records if not found
-            print("No DANE records found")
-        
+            if "3 1 1" in i['content']:
+                create_record(cf, zone_name, zone_id, 2, 1, 1, digest_ta)
+            elif "2 1 1" in i['content']:
+                create_record(cf, zone_name, zone_id, 3, 1, 1, digest_ee)
+            else:
+                create_record(cf, zone_name, zone_id, 2, 1, 1, digest_ta)
+                create_record(cf, zone_name, zone_id, 3, 1, 1, digest_ee)
 
     exit(0)
     
@@ -91,6 +95,25 @@ def update_records(cf, zone_name, zone_id, usage, selector, matching_type, certi
         dns_record = cf.zones.dns_records.put(zone_id, record_id, data=dns_record)
     except CloudFlare.exceptions.CloudFlareAPIError as e:
         exit('/zones.dns_records.put %s - %d %s - api call failed' % (zone_name, e, e))
+        
+def create_record(cf, zone_name, zone_id, usage, selector, matching_type, certificate):
+    dns_record = {
+        'type':'TLSA',
+        'name':'_25._tcp.mail.' + zone_name,
+        'ttl':60,
+        'data':{
+            'usage':usage,
+            'selector':selector,
+            'matching_type':matching_type,
+            'certificate':certificate,
+        },
+    }
+    
+    try:
+        r = cf.zones.dns_records.post(zone_id, data=dns_record)
+        print("Successfully created record: " + certificate)
+    except CloudFlare.CloudFlareAPIError as e:
+        exit('/zones.dns_records.post %s - %d %s' % (e, e))
 
 if __name__ == '__main__':
     main()
