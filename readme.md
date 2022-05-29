@@ -13,37 +13,9 @@ To use this project first clone it and then install the requirements as such:
 python3 -m pip install -r requirements.txt
 ```
 
-Then update the lines `zone_name` and `cf_api_key` in main.py in order to use the cloudflare api
-
 You can then use this code in a cron job to automatically update your TLSA records with CloudFlare each time you renew your LetsEncrypt certificates as such:
 ```bash
-python3 main.py /etc/letsencrypt/live/example.com
-```
-
-# Using environment variables instead of defining secrets in main.py
-If you prefer to use environment variables instead of defining secrets in the main.py file you can easily do this by adding/modifying the following lines in `main.py`
-
-at the top of the file add the following line
-```python3
-import os
-```
-
-then remove the following lines from the file
-```python3
-zone_name = "example.com"
-cf_api_key = "-aPikEyeXamplE"
-```
-
-replace the lines you just removed with the following lines
-```python3
-zone_name = os.environ.get("ZONE_NAME")
-cf_api_key = os.environ.get("CF_API_KEY")
-```
-
-You can now run the program using the following command via a Cron job or however you with to interact with this code
-for example:
-```bash
-ZONE_NAME=example.com CF_API_KEY="-example" python3 main.py /etc/letsencrypt/live/example.com
+ZONE_NAME="example.com" CF_API_KEY="-example" python3 main.py /etc/letsencrypt/live/example.com
 ```
 
 ### Did this help you?

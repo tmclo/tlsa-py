@@ -1,3 +1,4 @@
+import os
 import sys
 import hashlib
 from pathlib import Path
@@ -6,16 +7,9 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 import CloudFlare
 
-# Using static variables instead of .env file for portability
-# You could look into using something like HashiCorp Vault or environment variables
-# an example of using environment variables would be to add/modify the following lines
-# import os (<- add this to the top of the file)
-# zone_name = os.environ.get("ZONE_NAME")
-# cf_api_key = os.environ.get("CF_API_KEY")
-#
-# Then run this program as such: ZONE_NAME=example.com CF_API_KEY="-example" python3 main.py /etc/letsencrypt/live/example.com
-zone_name = "example.com"
-cf_api_key = "-aPikEyeXamplE"
+# You could look into using something like HashiCorp Vault or some other method of storing secrets if required.
+zone_name = os.environ.get("ZONE_NAME")
+cf_api_key = os.environ.get("CF_API_KEY")
 
 if len(sys.argv) < 2:
     exit('Usage: python3 ' + sys.argv[0] + ' /etc/ssl/certs (no trailing slash)')
