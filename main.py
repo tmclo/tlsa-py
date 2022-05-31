@@ -9,7 +9,7 @@ import CloudFlare
 
 # You could look into using something like HashiCorp Vault or some other method of storing secrets if required.
 zone_name = os.environ.get("ZONE_NAME")
-cf_api_key = os.environ.get("CF_API_KEY")
+cf_api_token = os.environ.get("CF_API_TOKEN")
 
 if len(sys.argv) < 2:
     exit('Usage: python3 ' + sys.argv[0] + ' /etc/ssl/certs (no trailing slash)')

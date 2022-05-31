@@ -15,7 +15,7 @@ python3 -m pip install -r requirements.txt
 
 You can then use this code in a cron job to automatically update your TLSA records with CloudFlare each time you renew your LetsEncrypt certificates as such:
 ```bash
-ZONE_NAME="example.com" CF_API_KEY="-example" python3 main.py /etc/letsencrypt/live/example.com
+ZONE_NAME="example.com" CF_API_TOKEN="-example" python3 main.py /etc/letsencrypt/live/example.com
 ```
 
 ### Did this help you?
