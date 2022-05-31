@@ -7,7 +7,10 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 import CloudFlare
 
-# You could look into using something like HashiCorp Vault or some other method of storing secrets if required.
+# Get the required credentials from environment variables.
+# Credentials are defined as such: 
+# ZONE_NAME="example.com" CF_API_TOKEN="apitoken" python3 main.py ./path/to/certificates/directory
+# DO NOT MODIFY THIS SECTION!
 zone_name = os.environ.get("ZONE_NAME")
 cf_api_token = os.environ.get("CF_API_TOKEN")
 
