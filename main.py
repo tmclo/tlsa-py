@@ -11,7 +11,6 @@ import CloudFlare
 # Credentials are defined as such: 
 # ZONE_NAME="example.com" CF_API_TOKEN="apitoken" python3 main.py ./path/to/certificates/directory
 # DO NOT MODIFY THIS SECTION! UNLESS YOU KNOW WHAT YOU ARE DOING
-
 zone_name = os.environ.get("ZONE_NAME")
 cf_api_token = os.environ.get("CF_API_TOKEN")
 
