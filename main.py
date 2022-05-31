@@ -24,7 +24,7 @@ def main():
         certificateDir = certificate_dir
 
     # initialize connection to CF API
-    cf = CloudFlare.CloudFlare(token=cf_api_key)
+    cf = CloudFlare.CloudFlare(token=cf_api_token)
 
     # try to get the zone id for use in further functions
     try:
