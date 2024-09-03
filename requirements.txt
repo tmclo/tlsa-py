@@ -1,2 +1,2 @@
-cloudflare
+cloudflare==2.19.*
 cryptography
